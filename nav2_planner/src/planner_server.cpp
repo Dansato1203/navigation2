@@ -63,6 +63,8 @@ PlannerServer::PlannerServer(const rclcpp::NodeOptions & options)
   // Setup the global costmap
   costmap_ros_ = std::make_shared<nav2_costmap_2d::Costmap2DROS>(
     "global_costmap", std::string{get_namespace()}, "global_costmap");
+
+  goal_pose_publisher_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/goal_pose", 10);
 }
 
 PlannerServer::~PlannerServer()
@@ -490,6 +492,8 @@ PlannerServer::computePlan()
     }
 
     result->path = getPlan(start, goal_pose, goal->planner_id);
+
+    goal_pose_publisher_->publish(goal_pose);
 
     if (!validatePath(action_server_pose_, goal_pose, result->path, goal->planner_id)) {
       return;
